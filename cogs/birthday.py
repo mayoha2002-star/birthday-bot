@@ -40,8 +40,13 @@ class Birthday(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    def is_admin(self, interaction):
-        return interaction.user.guild_permissions.administrator
+    OWNER_ID = 616286137341837314
+
+def is_admin(self, interaction):
+    return (
+        interaction.user.id == self.OWNER_ID
+        or interaction.user.guild_permissions.administrator
+    )
 
     def get_target(self, interaction, member):
         if member is None:
