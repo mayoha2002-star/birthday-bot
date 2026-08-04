@@ -21,8 +21,13 @@ class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    OWNER_ID = 616286137341837314
+
     def is_admin(self, interaction):
-        return interaction.user.guild_permissions.administrator
+        return (
+            interaction.user.id == self.OWNER_ID
+            or interaction.user.guild_permissions.administrator
+        )
 
     @app_commands.command(name="birthday_set_channel", description="このサーバーの誕生日通知チャンネルを設定します")
     @app_commands.describe(channel="通知するチャンネル")
