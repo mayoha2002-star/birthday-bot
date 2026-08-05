@@ -7,7 +7,7 @@ from discord.ext import commands
 
 
 OWNER_ID = 616286137341837314
-DATA_FILE = "birthdays.json"
+DATA_FILE = "/app/data/birthdays.json"
 
 
 def load_data() -> dict:
