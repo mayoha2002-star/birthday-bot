@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 from discord.ext import commands, tasks
 
 
-JJST = ZoneInfo("Asia/Tokyo")
+JST = ZoneInfo("Asia/Tokyo")
 BIRTHDAYS_FILE = "/app/data/birthdays.json"
 
 
