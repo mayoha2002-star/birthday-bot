@@ -7,6 +7,7 @@ from discord.ext import commands, tasks
 
 JST = ZoneInfo("Asia/Tokyo")
 BIRTHDAYS_FILE = "/app/data/birthdays.json"
+SETTINGS_FILE = "settings.json"
 
 
 def load_json(path, default):
@@ -31,8 +32,23 @@ class BirthdayTasks(commands.Cog):
         now = datetime.now(JST)
         today_key = now.strftime("%Y-%m-%d")
 
-        birthday_data = load_json("birthdays.json", {"guilds": {}})
-        settings = load_json("settings.json", {"guilds": {}})
+        # 0時台以外は何もしない
+        if now.hour != 0:
+            return
+
+        print(
+            f"[誕生日チェック] {now.strftime('%Y-%m-%d %H:%M:%S')} JST"
+        )
+
+        birthday_data = load_json(
+            BIRTHDAYS_FILE,
+            {"guilds": {}}
+        )
+
+        settings = load_json(
+            SETTINGS_FILE,
+            {"guilds": {}}
+        )
 
         all_guild_birthdays = birthday_data.get("guilds", {})
         all_guild_settings = settings.get("guilds", {})
@@ -40,7 +56,7 @@ class BirthdayTasks(commands.Cog):
         for guild in self.bot.guilds:
             guild_id = str(guild.id)
 
-            # 今日すでにこのサーバーで処理済みなら何もしない
+            # 今日すでに処理済みなら何もしない
             if self.last_processed_date.get(guild_id) == today_key:
                 continue
 
@@ -48,11 +64,19 @@ class BirthdayTasks(commands.Cog):
             channel_id = guild_setting.get("birthday_channel_id")
 
             if channel_id is None:
+                print(
+                    f"[スキップ] {guild.name}: "
+                    "誕生日通知チャンネル未設定"
+                )
                 continue
 
             channel = guild.get_channel(channel_id)
 
             if channel is None:
+                print(
+                    f"[スキップ] {guild.name}: "
+                    f"チャンネル {channel_id} が見つかりません"
+                )
                 continue
 
             guild_birthdays = all_guild_birthdays.get(guild_id, {})
@@ -78,12 +102,23 @@ class BirthdayTasks(commands.Cog):
                     "素敵な一年になりますように🥳✨"
                 )
 
-            # 誕生日の人がいない日も処理済みにする
+                print(
+                    f"[通知成功] {guild.name}: "
+                    f"{len(birthday_mentions)}人"
+                )
+            else:
+                print(
+                    f"[誕生日なし] {guild.name}: "
+                    f"{now.month}月{now.day}日"
+                )
+
+            # 今日の処理完了
             self.last_processed_date[guild_id] = today_key
 
     @birthday_loop.before_loop
     async def before_birthday_loop(self):
         await self.bot.wait_until_ready()
+        print("[誕生日自動通知] ループ開始")
 
 
 async def setup(bot):
